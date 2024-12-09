@@ -25,60 +25,73 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/usuarios")
+@CrossOrigin(origins = "http://localhost:4200") // Permite solicitudes desde el frontend
 @Validated
 public class UsuarioController {
+
     private static final Logger log = LoggerFactory.getLogger(UsuarioController.class);
 
     @Autowired
     private UsuarioService usuarioService;
 
+    // Listar usuarios
     @GetMapping
-    public CollectionModel<EntityModel<Usuario>> listarUsuarios() {
+    public ResponseEntity<List<Usuario>> listarUsuarios() {
         List<Usuario> usuarios = usuarioService.listarUsuarios();
-        log.info("GET /usuarios");
-        log.info("Retornando todos los datos de usuarios");
-
-        List<EntityModel<Usuario>> usuarioResources = usuarios.stream()
-            .map(usuario -> EntityModel.of(usuario,
-                    WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).obtenerUsuario(usuario.getId())).withSelfRel()
-            ))
-            .collect(Collectors.toList());
-
-        WebMvcLinkBuilder linkTo = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).listarUsuarios());
-        return CollectionModel.of(usuarioResources, linkTo.withRel("usuarios"));
+        log.info("GET /usuarios - Listando todos los usuarios");
+        return ResponseEntity.ok(usuarios);
     }
 
+    // Crear usuario
     @PostMapping
     public ResponseEntity<Usuario> crearUsuario(@Valid @RequestBody Usuario usuario) {
+        log.info("POST /usuarios - Creando usuario: " + usuario.getUsername());
         Usuario nuevoUsuario = usuarioService.guardarUsuario(usuario);
         return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED);
     }
 
+    // Obtener usuario por ID
     @GetMapping("/{id}")
     public ResponseEntity<Usuario> obtenerUsuario(@PathVariable Long id) {
+        log.info("GET /usuarios/" + id);
         Usuario usuario = usuarioService.obtenerUsuario(id)
-                .orElseThrow(() -> new ResourceNotFoundException("El usuario con ID " + id + " no fue encontrado."));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario con ID " + id + " no fue encontrado."));
         return ResponseEntity.ok(usuario);
     }
 
+    // Actualizar usuario
+    @PutMapping("/{id}")
+    public ResponseEntity<Usuario> actualizarUsuario(@PathVariable Long id, @Valid @RequestBody Usuario detallesUsuario) {
+        log.info("PUT /usuarios/" + id + " - Actualizando usuario");
+        Usuario usuario = usuarioService.obtenerUsuario(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario con ID " + id + " no fue encontrado."));
+
+        usuario.setUsername(detallesUsuario.getUsername());
+        usuario.setPassword(detallesUsuario.getPassword());
+        usuario.setEmail(detallesUsuario.getEmail());
+        usuario.setBirthdate(detallesUsuario.getBirthdate());
+        usuario.setAddress(detallesUsuario.getAddress());
+
+        Usuario usuarioActualizado = usuarioService.guardarUsuario(usuario);
+        return ResponseEntity.ok(usuarioActualizado);
+    }
+
+    // Eliminar usuario
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarUsuario(@PathVariable Long id) {
+        log.info("DELETE /usuarios/" + id);
         usuarioService.obtenerUsuario(id)
-                .orElseThrow(() -> new ResourceNotFoundException("El usuario con ID " + id + " no fue encontrado."));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario con ID " + id + " no fue encontrado."));
         usuarioService.eliminarUsuario(id);
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Usuario> actualizarUsuario(@PathVariable Long id, @Valid @RequestBody Usuario detallesUsuario) {
-        Usuario usuario = usuarioService.obtenerUsuario(id)
-                .orElseThrow(() -> new ResourceNotFoundException("El usuario con ID " + id + " no fue encontrado."));
-        
-        usuario.setUsername(detallesUsuario.getUsername());
-        usuario.setPassword(detallesUsuario.getPassword());
-        usuario.setRol(detallesUsuario.getRol());
-
-        Usuario usuarioActualizado = usuarioService.guardarUsuario(usuario);
-        return ResponseEntity.ok(usuarioActualizado);
+    @PostMapping("/bulk")
+    public ResponseEntity<List<Usuario>> crearUsuariosMasivamente(@Valid @RequestBody List<Usuario> usuarios) {
+        log.info("POST /usuarios/bulk - Creando usuarios masivamente");
+        List<Usuario> usuariosGuardados = usuarios.stream()
+                .map(usuarioService::guardarUsuario)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(usuariosGuardados, HttpStatus.CREATED);
     }
 }

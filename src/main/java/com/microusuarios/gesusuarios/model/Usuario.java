@@ -13,21 +13,22 @@ public class Usuario {
     @Column(name = "id")
     private Long id;
 
-
-    @Size(min = 1, max = 100, message = "El user debe tener entre 1 y 100 caracteres")
-    @Column(name = "username")
+    @Column(name = "username", nullable = false, length = 100)
     private String username;
 
-    @NotNull(message = "La contraseña no puede ser nula")
-    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
-    @Column(name = "password")
+    @Column(name = "email", nullable = false, length = 100)
+    private String email;
+
+    @Column(name = "password", nullable = false, length = 255)
     private String password;
 
-    @NotNull(message = "El rol no puede ser nulo")
-    @Size(min = 1, max = 50, message = "El rol debe tener entre 1 y 50 caracteres")
-    @Column(name = "rol")
-    private String rol;
+    @Column(name = "birthdate", nullable = false)
+    private String birthdate;
 
+    @Column(name = "address", length = 255)
+    private String address;
+
+    // Getters y Setters
     public Long getId() {
         return id;
     }
@@ -44,6 +45,14 @@ public class Usuario {
         this.username = username;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getPassword() {
         return password;
     }
@@ -52,13 +61,19 @@ public class Usuario {
         this.password = password;
     }
 
-    public String getRol() {
-        return rol;
+    public String getBirthdate() {
+        return birthdate;
     }
 
-    public void setRol(String rol) {
-        this.rol = rol;
+    public void setBirthdate(String birthdate) {
+        this.birthdate = birthdate;
     }
 
-   
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 }
