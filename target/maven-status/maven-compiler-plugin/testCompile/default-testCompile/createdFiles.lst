@@ -1,1 +1,7 @@
+com\microusuarios\gesusuarios\service\UsuarioServiceTest.class
+com\microusuarios\gesusuarios\controller\UsuarioControllerTest.class
 com\microusuarios\gesusuarios\GesusuariosApplicationTests.class
+com\microusuarios\gesusuarios\exception\GlobalExceptionHandlerTest.class
+com\microusuarios\gesusuarios\exception\ResourceNotFoundExceptionTest.class
+com\microusuarios\gesusuarios\model\UsuarioTest.class
+com\microusuarios\gesusuarios\repository\UsuarioRepositoryTest.class

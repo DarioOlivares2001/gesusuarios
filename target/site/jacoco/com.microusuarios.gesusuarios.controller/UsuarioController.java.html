@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UsuarioController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">gesusuarios</a> &gt; <a href="index.source.html" class="el_package">com.microusuarios.gesusuarios.controller</a> &gt; <span class="el_source">UsuarioController.java</span></div><h1>UsuarioController.java</h1><pre class="source lang-java linenums">package com.microusuarios.gesusuarios.controller;
+
+import java.util.List;
+
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import com.microusuarios.gesusuarios.exception.ResourceNotFoundException;
+import com.microusuarios.gesusuarios.model.Usuario;
+import com.microusuarios.gesusuarios.service.UsuarioService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping(&quot;/api/usuarios&quot;)
+@CrossOrigin(origins = &quot;http://localhost:4200&quot;) // Permite solicitudes desde el frontend
+@Validated
+<span class="fc" id="L23">public class UsuarioController {</span>
+
+<span class="fc" id="L25">    private static final Logger log = LoggerFactory.getLogger(UsuarioController.class);</span>
+
+    @Autowired
+    private UsuarioService usuarioService;
+
+    // Listar usuarios
+    @GetMapping
+    public ResponseEntity&lt;List&lt;Usuario&gt;&gt; listarUsuarios() {
+<span class="fc" id="L33">        List&lt;Usuario&gt; usuarios = usuarioService.listarUsuarios();</span>
+<span class="fc" id="L34">        log.info(&quot;GET /usuarios - Listando todos los usuarios&quot;);</span>
+<span class="fc" id="L35">        return ResponseEntity.ok(usuarios);</span>
+    }
+
+    // Crear usuario
+    @PostMapping
+    public ResponseEntity&lt;Usuario&gt; crearUsuario(@Valid @RequestBody Usuario usuario) {
+<span class="fc" id="L41">        log.info(&quot;POST /usuarios - Creando usuario: &quot; + usuario.getUsername());</span>
+<span class="fc" id="L42">        Usuario nuevoUsuario = usuarioService.guardarUsuario(usuario);</span>
+<span class="fc" id="L43">        return new ResponseEntity&lt;&gt;(nuevoUsuario, HttpStatus.CREATED);</span>
+    }
+
+    // Obtener usuario por ID
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Usuario&gt; obtenerUsuario(@PathVariable Long id) {
+<span class="fc" id="L49">        log.info(&quot;GET /usuarios/&quot; + id);</span>
+<span class="fc" id="L50">        Usuario usuario = usuarioService.obtenerUsuario(id)</span>
+<span class="fc" id="L51">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Usuario con ID &quot; + id + &quot; no fue encontrado.&quot;));</span>
+<span class="fc" id="L52">        return ResponseEntity.ok(usuario);</span>
+    }
+
+    // Actualizar usuario
+    @PutMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Usuario&gt; actualizarUsuario(@PathVariable Long id, @Valid @RequestBody Usuario detallesUsuario) {
+<span class="fc" id="L58">        log.info(&quot;PUT /usuarios/&quot; + id + &quot; - Actualizando usuario&quot;);</span>
+<span class="fc" id="L59">        Usuario usuario = usuarioService.obtenerUsuario(id)</span>
+<span class="pc" id="L60">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Usuario con ID &quot; + id + &quot; no fue encontrado.&quot;));</span>
+
+<span class="fc" id="L62">        usuario.setUsername(detallesUsuario.getUsername());</span>
+<span class="fc" id="L63">        usuario.setPassword(detallesUsuario.getPassword());</span>
+<span class="fc" id="L64">        usuario.setEmail(detallesUsuario.getEmail());</span>
+<span class="fc" id="L65">        usuario.setBirthdate(detallesUsuario.getBirthdate());</span>
+<span class="fc" id="L66">        usuario.setAddress(detallesUsuario.getAddress());</span>
+
+<span class="fc" id="L68">        Usuario usuarioActualizado = usuarioService.guardarUsuario(usuario);</span>
+<span class="fc" id="L69">        return ResponseEntity.ok(usuarioActualizado);</span>
+    }
+
+    // Eliminar usuario
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Void&gt; eliminarUsuario(@PathVariable Long id) {
+<span class="fc" id="L75">        log.info(&quot;DELETE /usuarios/&quot; + id);</span>
+<span class="fc" id="L76">        usuarioService.obtenerUsuario(id)</span>
+<span class="pc" id="L77">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Usuario con ID &quot; + id + &quot; no fue encontrado.&quot;));</span>
+<span class="fc" id="L78">        usuarioService.eliminarUsuario(id);</span>
+<span class="fc" id="L79">        return ResponseEntity.noContent().build();</span>
+    }
+
+    @PostMapping(&quot;/bulk&quot;)
+    public ResponseEntity&lt;List&lt;Usuario&gt;&gt; crearUsuariosMasivamente(@Valid @RequestBody List&lt;Usuario&gt; usuarios) {
+<span class="fc" id="L84">        log.info(&quot;POST /usuarios/bulk - Creando usuarios masivamente&quot;);</span>
+<span class="fc" id="L85">        List&lt;Usuario&gt; usuariosGuardados = usuarios.stream()</span>
+<span class="fc" id="L86">                .map(usuarioService::guardarUsuario)</span>
+<span class="fc" id="L87">                .collect(Collectors.toList());</span>
+<span class="fc" id="L88">        return new ResponseEntity&lt;&gt;(usuariosGuardados, HttpStatus.CREATED);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

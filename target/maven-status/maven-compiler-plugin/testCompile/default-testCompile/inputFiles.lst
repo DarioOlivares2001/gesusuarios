@@ -1,1 +1,7 @@
-C:\Springboot2\FS3\Semana5\entrega\gesusuarios\src\test\java\com\microusuarios\gesusuarios\GesusuariosApplicationTests.java
+C:\sonar\gesusuarios\src\test\java\com\microusuarios\gesusuarios\controller\UsuarioControllerTest.java
+C:\sonar\gesusuarios\src\test\java\com\microusuarios\gesusuarios\exception\GlobalExceptionHandlerTest.java
+C:\sonar\gesusuarios\src\test\java\com\microusuarios\gesusuarios\exception\ResourceNotFoundExceptionTest.java
+C:\sonar\gesusuarios\src\test\java\com\microusuarios\gesusuarios\GesusuariosApplicationTests.java
+C:\sonar\gesusuarios\src\test\java\com\microusuarios\gesusuarios\model\UsuarioTest.java
+C:\sonar\gesusuarios\src\test\java\com\microusuarios\gesusuarios\repository\UsuarioRepositoryTest.java
+C:\sonar\gesusuarios\src\test\java\com\microusuarios\gesusuarios\service\UsuarioServiceTest.java
